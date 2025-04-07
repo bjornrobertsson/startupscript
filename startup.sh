@@ -43,4 +43,6 @@ add_mirror_block "192.168.2.250:5000" "http://192.168.2.250:5000"
 
 echo "Done patching $CONFIG_FILE"
 
-sudo pkill -SIGHUP containerd
+### sudo pkill -SIGHUP contained
+
+systemctl restart containerd
