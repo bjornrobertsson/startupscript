@@ -6,37 +6,41 @@ PAGER=cat
 # Ensure the config file exists
 sudo touch "$CONFIG_FILE"
 
-# Function to safely add a mirror block
 add_mirror_block() {
   local registry="$1"
   local url="$2"
   local insecure="$3"
 
-  if grep -q "\[plugins.\"io.containerd.grpc.v1.cri\".registry.mirrors.\"$registry\"\]" "$CONFIG_FILE"; then
-    echo "Mirror for $registry already exists. Skipping."
+  local certs_dir="/etc/containerd/certs.d/$registry"
+  local hosts_file="$certs_dir/hosts.toml"
+
+  if [ -f "$hosts_file" ]; then
+    echo "hosts.toml for $registry already exists. Skipping."
     return
   fi
 
-  echo "Adding mirror for $registry"
+  echo "Creating mirror config for $registry in $hosts_file"
 
-  sudo tee -a "$CONFIG_FILE" > /dev/null <<EOF
+  sudo mkdir -p "$certs_dir"
 
-[plugins."io.containerd.grpc.v1.cri".registry.mirrors."$registry"]
-  endpoint = ["$url"]
+  sudo tee "$hosts_file" > /dev/null <<EOF
+server = "$url"
+
+[host."$url"]
+  capabilities = ["pull", "resolve"]
 EOF
 
-  # Optional: Add insecure_skip_verify if requested
   if [ "$insecure" = "true" ]; then
-    sudo tee -a "$CONFIG_FILE" > /dev/null <<EOF
-[plugins."io.containerd.grpc.v1.cri".registry.configs."$registry".tls]
-  insecure_skip_verify = true
+    sudo tee -a "$hosts_file" > /dev/null <<EOF
+  skip_verify = true
 EOF
   fi
- sleep 10
- systemctl restart containerd
- sleep 2
- systemctl status containerd
- return $?
+
+  sleep 10
+  systemctl restart containerd
+  sleep 2
+  systemctl status containerd
+  return $?
 }
 
 backup_toml() {
