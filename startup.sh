@@ -39,7 +39,7 @@ EOF
   sleep 10
   systemctl restart containerd
   sleep 2
-  systemctl status containerd |tail -10
+  systemctl --no-pager status containerd
   return $?
 }
 
