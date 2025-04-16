@@ -64,7 +64,7 @@ BACKUP_TOML="/etc/containerd/config.toml.bak"
 
 backup_toml
 
-# add_mirror_block "docker-registry.docker-registry.svc.local:5000" "http://docker-registry.docker-registry.svc.local:5000" || revert_toml
+add_mirror_block "docker-registry.docker-registry.svc.local:5000" "http://docker-registry.docker-registry.svc.local:5000" || revert_toml
 add_mirror_block "docker-registry.docker-registry.svc.local:5000" "http://docker-registry.docker-registry.svc.local:5000" || revert_toml
 add_mirror_block "docker-direct.local:80" "http://docker-direct.local:80" || revert_toml
 add_mirror_block "docker.local" "https://docker.local" true || revert_toml
